@@ -483,26 +483,26 @@
 <p>B树是非叶子节点和叶子节点都会存储数据</p>
 <p>B+树只有叶子节点才会存储数据，而且存储的数据都是在一行上，而且这些数据都是有指针指向的，也就是有顺序的，索引列 order by</p>
 </blockquote>
-<p>##非聚簇索引（MyISAM）</p>
-<ul>
-<li>B+树叶子节点只会存储数据行（数据文件）的指针，简单来说<strong>数据和索引不在一起</strong>，就是非聚簇索引</li>
-<li><strong>非聚簇索引包含主键索引和辅助索引都会存储指针的值</strong></li>
-</ul>
-<p>分为主键索引和辅助索引</p>
-<p>####主键和辅助索引</p>
-<p>两个索引结构上没有任何区别，只是主键索引要求key是唯一的，而辅助索引的key可以重复。</p>
-<p><strong>省去两张图</strong></p>
 <h2 id="聚簇索引（InnoDB）"><a href="#聚簇索引（InnoDB）" class="headerlink" title="聚簇索引（InnoDB）"></a>聚簇索引（InnoDB）</h2><ul>
 <li>主键索引的叶子节点会存储数据行，也就是说数据和索引是在一起的，这就是聚簇索引</li>
 <li>辅助索引只会存储主键值</li>
 <li>如果没有主键，使用唯一索引建立聚簇索引；如果没有唯一索引，MySQL会按照一定规则创建聚簇索引</li>
 </ul>
-<p>####主键索引</p>
+<p><strong>主键索引</strong></p>
 <p>1.InnoDB要求表必须有主键，如果没有显式指定，MySQL系统会自动选择一个可以唯一标识数据记录的列作为主键，如果不存在这种列，MySQL自动为InnoDB表生成一个隐含字段作为主键，类型为长整型</p>
-<h4 id="辅助索引"><a href="#辅助索引" class="headerlink" title="辅助索引"></a>辅助索引</h4><p>2.第二个与MyISAM索引的不同是 InnoDB 的辅助索引 data域存储相应记录主键的值而不是地址。换句话说InnoDB的所有辅助索引都引用主键作为data域</p>
+<p><strong>辅助索引</strong></p>
+<p>2.第二个与MyISAM索引的不同是 InnoDB 的辅助索引 data域存储相应记录主键的值而不是地址。换句话说InnoDB的所有辅助索引都引用主键作为data域</p>
 <p>聚簇索引这种实现方式使得主键的搜索十分高效，但是辅助索引搜索需要检索两遍索引：首先检索辅助索引获得主键，然后用主键到主索引中检索获得记录</p>
 <p>select * fromd user whered name = ‘Alice’    回表查询 检索两次 非主键索引 — pk — 索引 — 数据</p>
 <p>select id,name from user whered name = ‘Alice’ 不需要回表，在辅助索引树上就可以查询到了  覆盖索引（多用组合索引）</p>
+<h2 id="非聚簇索引（MyISAM）"><a href="#非聚簇索引（MyISAM）" class="headerlink" title="非聚簇索引（MyISAM）"></a>非聚簇索引（MyISAM）</h2><ul>
+<li>B+树叶子节点只会存储数据行（数据文件）的指针，简单来说<strong>数据和索引不在一起</strong>，就是非聚簇索引</li>
+<li><strong>非聚簇索引包含主键索引和辅助索引都会存储指针的值</strong></li>
+</ul>
+<p>分为主键索引和辅助索引</p>
+<p><strong>主键和辅助索引</strong></p>
+<p>两个索引结构上没有任何区别，只是主键索引要求key是唯一的，而辅助索引的key可以重复。</p>
+<p><strong>省去两张图</strong></p>
 
                 
             </div>
