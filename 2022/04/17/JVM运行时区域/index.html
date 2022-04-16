@@ -5,8 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="spring,springboot,Vue,idea">
-    <meta name="description" content="1.HashMap一些底层方法理解remove方法仅适合看过源码的朋友~~小总结
-通过观察源码我们可以发现，remove方法里面有一个removeNode方法，基本整个逻辑都是在这里面进行的，首先判断这个表不为空并且下标有值，这个判断和ge">
+    <meta name="description" content="JVM运行时区域做一个浅浅的总结吧。
+首先就是程序计数器、本地方法栈、虚拟机栈 还有 方法区和堆 
+jdk1.8之后方法区也叫做元空间 并且方法区里面有运行时常量池，堆里面有字符串常量池
+线程私有的：程序计数器、本地方法栈和虚拟机栈
+一个个">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -381,7 +384,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2021-10-31
+                    2022-04-17
                 </div>
                 
 
@@ -402,21 +405,18 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="1-HashMap一些底层方法理解"><a href="#1-HashMap一些底层方法理解" class="headerlink" title="1.HashMap一些底层方法理解"></a>1.HashMap一些底层方法理解</h1><h2 id="remove方法"><a href="#remove方法" class="headerlink" title="remove方法"></a>remove方法</h2><p>仅适合看过源码的朋友~~小总结</p>
-<p>通过观察源码我们可以发现，remove方法里面有一个removeNode方法，基本整个逻辑都是在<br>这里面进行的，首先判断这个表不为空并且下标有值，这个判断和getNode方法的第一层if是<br>一个意思，否则的话条件不成立就直接返回null，成立的话就进入以下逻辑：<br>第一种情况就是说该桶位的key和传进来的key是相等的，并且是一个桶位就直接remove删除<br>第二种情况就是说next不等于null就代表后面还有值，有哈希碰撞那么还需要判断类型，如果<br>说是该节点是树类的话，就调用树的getTreeNode方法，否则就是链表就挨个遍历然后删即即可</p>
-<h2 id="get方法"><a href="#get方法" class="headerlink" title="get方法"></a>get方法</h2><p>仅适合看过源码的朋友~~</p>
-<p>通过观察源码可以发现，get方法里面有一个getNode()方法，那么这个getNode方法就是整个<br>核心部分，getNode方法里传递的参数是hash和key，首先if判断这个表是否为空，长度是否大<br>于0，然后当前下标的值不能是null，否则就返回null，有值的话就进入判断，3钟情况：<br>第一种情况就是说，当前桶位就一个元素，那获取到之后就直接返回<br>第二种情况就是说，当前桶位不止一个元素，next不等于null就代表有哈希碰撞了并且是这个<br>节点属于红黑树，那么就调用这个树的获取方法去进行<br>第三种情况就是说，也是桶位不止一个元素，桶位形成链表的情况，这种情况就也很简单，判断<br>key相等然后返回就行了</p>
-<h2 id="put方法"><a href="#put方法" class="headerlink" title="put方法"></a>put方法</h2><p>仅适合看过源码的朋友们~~</p>
-<p>首先关于这个put方法，通过源码分析我们可以发现，put方法传参是key，value。那么其实<br>里面有一个方法putVal()，hash就是低16位与高16位异或得到。</p>
-<p>那么我们来看putVal，通过观察源码我们可以分析大概为四种情况：<br>1.slot为空 我们直接通过寻址算法(table.length - 1 &amp; hash) 找到数组下标<br>然后newNode()包装完之后丢进下标就可以了<br>2.slot不为空的情况 还未被链化，需要对比一下，对比这个key和put进来的key是否一致，<br>如果一致的话就做一个替换操作，如果不一致的话就是一波hash冲突了，那么如果这种情况<br>的话，这种情况就用尾插的方式插入进链表里面去<br>3.这种情况就已经链化了，跟第二种情况相似，需要我们去进行对比一下，对比进来这个key<br>和put进来的key是否一致，一致的话就进行替换操作，如果不一致的话用尾插法的形式给它<br>插到链表尾部就好了，这个还没完，如果这个时候就要去比较树化阈值，如果达到这个树化<br>阈值的话，就需要调用这个树化方法，这个树化操作都在该方法里完成<br>4.就是很严重的情况了，那个链表已经转成红黑树了</p>
-<h2 id="resize方法"><a href="#resize方法" class="headerlink" title="resize方法"></a>resize方法</h2><p>仅适合看过源码的朋友们~~</p>
-<p>还是以jdk1.8为例，通过源码观察，我们可以发现这个resize方法有一个注解，这个注解上下<br>划为两个区域，(那么其实这个注解就不做过多的解释了，这个注解叫做supperwarnings，意<br>思大概就是不让编译器起到警告信息的作用)，那说回来是这样子的，注解的上半部分就是开了<br>个newCap和newThr(新数组长度，新的扩容阈值)，newCap就是新数组table长度，做一系列<br>判断后啊他就让oldCap左移1位就是乘2的意思，新的扩容阈值就是让它去做一个新数组长度去<br>乘以这个负载因子得到，里面还有些大小判断就不细讲了。</p>
-<p>那么到这个核心就是注解的下半部分代码，通过源码我们可以观察到他扩容是通过一个一个迭<br>代，用到的是一个for循环，循环次数是oldCap也就是老数组的大小，在这个循环里面有许多<br>的if和else if的判断，总的来说分位四种情况：<br>1.slot是null<br>在说2和3的情况下先说一下源码里面有提到loHead、loTail、hiHead、hiTail<br>分别对应的是：低位链表头、低位链表尾、高位链表头、高位链表尾<br>2.slot存储的是Node，还没有链化<br>3.slot存储是Node,已经链化的情况<br>4.存储的是了一个红黑树根节点TreeNode对象</p>
-<p>迁移的时候发现这个slot存储这个节点是null的时候，说明没有产生hash冲突就直接通过<br>寻址算法(e.hash&amp;newCap-1)得到下标后，根据新表计算出来的下标直接迁移进去就好了。<br>然后就是说如果这个node.next不是null的情况说明发生过hash冲突，需要分位高位链、和<br>低位链。简单说这个老表里这个桶位已经链化了，链表的所有hash字段转为二进制后低位都<br>是相同的，低位就是table.length - 1转化的二进制的有效位，打比方 16 - 1 -》 15的<br>二进制1111高位是第5位是0，但不一定所有高位都是0有可能是1,低位链因为高位是0所以迁<br>移到node新表的时候，slot下标和老表的下标是一样的，如果是高位链的话迁移到新表的下标<br>就是老表位置+老表的长度，比如老表大小是16然后下标是8，16+8就是24，下标24的桶位</p>
-<h1 id="2-Arraylist一些源码"><a href="#2-Arraylist一些源码" class="headerlink" title="2.Arraylist一些源码"></a>2.Arraylist一些源码</h1><p><img src="D:\Typora\pictures\image-20211031125723089.png" alt="image-20211031125723089"></p>
-<p><img src="D:\Typora\pictures\image-20211031125741242.png" alt="image-20211031125741242"><img src="D:\Typora\pictures\image-20211031125755304.png" alt="image-20211031125755304"></p>
-<p><img src="D:\Typora\pictures\image-20211031125810401.png" alt="image-20211031125810401"></p>
-
+                <h1 id="JVM运行时区域"><a href="#JVM运行时区域" class="headerlink" title="JVM运行时区域"></a>JVM运行时区域</h1><p>做一个浅浅的总结吧。</p>
+<p>首先就是程序计数器、本地方法栈、虚拟机栈 还有 方法区和堆 </p>
+<p>jdk1.8之后方法区也叫做元空间 并且方法区里面有运行时常量池，堆里面有字符串常量池</p>
+<p>线程私有的：程序计数器、本地方法栈和虚拟机栈</p>
+<p>一个个说吧，程序计数器就是jvm用来标注字节码指令执行到的位置，它也会有循环、分支、跳转等等一系列操作都需要依赖程序计数器来完成。</p>
+<p>虚拟机栈的话，其实Java内存可以粗糙分为栈内存和堆内存，那现在讲的就是这个栈内存，和堆内存不一样的就是虚拟机栈都是线程私有的，并且每个栈里都有栈帧，每个栈帧中对应有：局部变量表，操作数栈，动态链接，方法出口信息。</p>
+<p>存放一些基本数据类型和对象引用。这是线程私有的一般来说不会有线程安全问题，但是如果对局部变量引用了对象，逃离了方法的范围的话就会引发线程安全问题。</p>
+<p>本地方法栈，这个其实和虚拟机栈差不多，不过它的底层是用c和c++写的一些代码 我们可以直接用 Java 调用一些方法。</p>
+<p>堆的话，就是线程共享的，所以是线程不安全的。里面存放的基本是各种实例对象和数组，当然还有说到的字符串常量池。Java的堆基本是垃圾回收器GC的主要部分，从垃圾回收的角度看的话，现在的收集器都采用分代回收算法来进行划分，像新生代、老年代、永久代。</p>
+<p>后面的话永久代就被移除了，取而代之用的是元空间</p>
+<p>方法区，和堆一样都是线程共享并且不安全，里面存放静态变量、类信息、常量等一些数据。至于它和永久代的关系，只能他两其实关系类似吧，永久代是一种概念，方法区是一种标准。所以的话其他虚拟机也没有永久代这个说法。</p>
+<h1 id="对象创建的过程（待完善）"><a href="#对象创建的过程（待完善）" class="headerlink" title="对象创建的过程（待完善）"></a>对象创建的过程（待完善）</h1>
                 
             </div>
             <hr/>
@@ -442,7 +442,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://example.com/2021/10/31/HashMap%E5%92%8CArrayList%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/">http://example.com/2021/10/31/HashMap%E5%92%8CArrayList%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/</a>
+                    <a href="http://example.com/2022/04/17/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8C%BA%E5%9F%9F/">http://example.com/2022/04/17/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8C%BA%E5%9F%9F/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -653,7 +653,7 @@
             <div class="article-badge left-badge text-color">
                 <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/2021/10/31/Hexo%20+%20github%E8%B8%A9%E5%9D%91/">
+                <a href="/2022/04/17/Mysql%E2%80%94%E5%B9%BB%E8%AF%BB/">
                     <div class="card-image">
                         
                         
@@ -670,7 +670,7 @@
                     </div>
                     <div class="publish-info">
                         <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2021-10-31
+                            <i class="far fa-clock fa-fw icon-date"></i>2022-04-17
                         </span>
                         <span class="publish-author">
                             
@@ -687,10 +687,10 @@
         
         <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge right-badge text-color">
-                本篇&nbsp;<i class="far fa-dot-circle"></i>
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2021/10/31/HashMap%E5%92%8CArrayList%E9%83%A8%E5%88%86%E6%BA%90%E7%A0%81/">
+                <a href="/2022/04/17/GC%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/">
                     <div class="card-image">
                         
                         
@@ -707,7 +707,7 @@
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2021-10-31
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-04-17
                             </span>
                         <span class="publish-author">
                             
@@ -717,7 +717,6 @@
                         </span>
                     </div>
                 </div>
-
                 
             </div>
         </div>
